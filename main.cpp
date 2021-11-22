@@ -13,48 +13,52 @@ public:
 class shared_ptr_toy
 {
     Toy* object = nullptr;
-    static int count_ptr;
+    int* count_ptr = nullptr;
 public:
     shared_ptr_toy(std::string name)
     {
         object = new Toy(name);
-        ++count_ptr;
+        count_ptr = new int(1);
     }
 
     shared_ptr_toy()
     {
         object = new Toy("SomeName");
-        ++count_ptr;
+        count_ptr = new int(1);
     }
 
     shared_ptr_toy(const shared_ptr_toy& ptr_other)
     {
         object = ptr_other.object;
-        ++count_ptr;
+        count_ptr = ptr_other.count_ptr;
+        ++(*count_ptr);
     }
 
     shared_ptr_toy& operator=(const shared_ptr_toy& ptr_other)
     {
         if(this == &ptr_other)
             return *this;
-        if(object != nullptr)
-            delete object;
+        reset();
 
-        object = new Toy(*ptr_other.object);
-        ++count_ptr;
+        object = ptr_other.object;
+        count_ptr = ptr_other.count_ptr;
+        ++(*count_ptr);
         return *this;
     }
 
     void reset()
     {
-        std::cout << count_ptr << std::endl;
-        if (count_ptr != 0)
+        if (object != nullptr)
         {
-            --count_ptr;
-            if(count_ptr == 0)
+            --(*count_ptr);
+            if(*count_ptr == 0)
+            {
                 delete object;
+                delete count_ptr;
+            }
         }
         object = nullptr;
+        count_ptr = nullptr;
     }
 
     ~shared_ptr_toy()
@@ -67,8 +71,6 @@ public:
         return object->getName();
     }
 };
-
-int shared_ptr_toy::count_ptr = 0;
 
 shared_ptr_toy make_shared(std::string name)
 {
